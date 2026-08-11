@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mijn Loketpas — Publieke diensten</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --inkt:#16233B; --inkt2:#1E2F4F; --teal:#058B94; --teal2:#0AA3AD;
+  --papier:#F6F3EB; --papier2:#EFEAD9; --rood:#C63D2F; --goud:#F2B33D;
+  --mint:#1FA57F; --mintlicht:#EAFBF4; --roodlicht:#FCEEEC; --lijn:#D8D2C0;
+  --schaduw:0 10px 30px rgba(6,14,28,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Space Grotesk",system-ui,sans-serif;color:var(--papier);min-height:100vh;
+  background:
+    radial-gradient(900px 500px at 90% -10%, rgba(5,139,148,.28), transparent 60%),
+    radial-gradient(700px 450px at -10% 110%, rgba(47,196,154,.16), transparent 55%),
+    var(--inkt);
+  display:flex;flex-direction:column;
+}
+.wrap{width:min(760px,94vw);margin:0 auto;flex:1;display:flex;flex-direction:column;padding:20px 0 14px}
+.screen{display:none;flex:1;flex-direction:column}
+.screen.actief{display:flex;animation:in .3s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.eyebrow{font-size:12px;letter-spacing:.26em;color:var(--teal2);text-transform:uppercase;font-weight:700}
+h1{font-family:"Archivo Black";font-size:clamp(30px,7vw,46px);line-height:1.06;margin-top:6px}
+.sub{color:#B9C4D6;font-size:16px;margin-top:10px;line-height:1.5}
+.btn{font-family:"Space Grotesk";font-weight:700;font-size:17px;border:0;border-radius:12px;padding:15px 26px;cursor:pointer;transition:transform .1s ease,filter .1s ease}
+.btn:active{transform:scale(.97)}
+.btn:focus-visible{outline:3px solid var(--goud);outline-offset:2px}
+.btn-primair{background:var(--teal);color:#fff}
+.btn-primair:hover{filter:brightness(1.12)}
+.btn-stil{background:transparent;color:#B9C4D6;border:1.5px solid #3A4A68}
+
+/* startkaart */
+.startkaart{background:var(--inkt2);border:1px solid #2C3E60;border-radius:16px;padding:24px;margin-top:22px}
+.startkaart input{
+  width:100%;font-family:"Space Grotesk";font-size:17px;padding:12px 14px;border-radius:10px;margin-top:8px;
+  border:1.5px solid #3A4A68;background:#111D33;color:var(--papier);font-weight:500;
+}
+.startkaart input:focus{outline:none;border-color:var(--teal2)}
+.startkaart label{font-size:14px;color:#8fa0ba;font-weight:700}
+
+/* bovenbalk tijdens quiz */
+.balk{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.puntenvak{
+  background:var(--papier);color:var(--inkt);border-radius:12px;padding:8px 16px;display:flex;align-items:baseline;gap:8px;
+  box-shadow:var(--schaduw);
+}
+.puntenvak small{font-size:10px;letter-spacing:.2em;font-weight:700;color:#7a7361}
+.puntenvak b{font-family:"Archivo Black";font-size:26px;transition:transform .15s ease}
+.puntenvak b.plop{transform:scale(1.35);color:var(--mint)}
+.timervak{
+  background:var(--papier);color:var(--inkt);border-radius:12px;padding:8px 16px;display:flex;align-items:baseline;gap:8px;
+  box-shadow:var(--schaduw);min-width:96px;justify-content:center;
+}
+.timervak small{font-size:10px;letter-spacing:.2em;font-weight:700;color:#7a7361}
+.timervak b{font-family:"Archivo Black";font-size:26px;min-width:2ch;text-align:center}
+.timervak.bijna{background:var(--roodlicht)}
+.timervak.bijna b{color:var(--rood);animation:tik 1s infinite}
+@keyframes tik{50%{opacity:.5}}
+.tijdbalk{height:6px;background:#2C3E60;border-radius:3px;margin-top:12px;overflow:hidden}
+.tijdbalk i{display:block;height:100%;width:100%;background:var(--teal2);border-radius:3px;transition:width 1s linear}
+.tijdbalk i.bijna{background:var(--rood)}
+.reeks{font-size:13px;font-weight:700;color:var(--goud);min-height:18px}
+
+/* stempelkaart (voortgang) */
+.stempelkaart{
+  margin-top:14px;background:var(--papier);border-radius:12px;padding:10px 12px;display:flex;gap:7px;flex-wrap:wrap;justify-content:center;
+}
+.vakje{
+  width:34px;height:34px;border:2px dashed var(--lijn);border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-family:"Archivo Black";font-size:15px;color:#c9c2ac;background:#fff;
+}
+.vakje.goed{border:2.5px solid var(--mint);color:var(--mint);transform:rotate(-6deg);background:var(--mintlicht)}
+.vakje.fout{border:2.5px solid var(--rood);color:var(--rood);transform:rotate(5deg);background:var(--roodlicht)}
+.vakje.nu{border-color:var(--teal);color:var(--teal)}
+
+/* vraagkaart */
+.vraagkaart{background:var(--papier);color:var(--inkt);border-radius:16px;padding:clamp(20px,4vw,30px);margin-top:16px;box-shadow:var(--schaduw);position:relative;overflow:hidden}
+.themalabel{display:inline-block;font-size:11px;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--teal);background:var(--papier2);border-radius:6px;padding:4px 9px}
+.vtekst{font-size:clamp(19px,3.4vw,24px);font-weight:700;line-height:1.35;margin-top:12px}
+.opties{display:grid;gap:10px;margin-top:18px}
+.optie{
+  text-align:left;background:#fff;border:2px solid var(--lijn);border-radius:12px;padding:14px 16px;font-size:17px;font-weight:500;
+  font-family:"Space Grotesk";color:var(--inkt);cursor:pointer;display:flex;gap:11px;align-items:center;transition:border-color .12s ease, transform .12s ease;
+}
+.optie:hover{border-color:var(--teal2)}
+.optie:focus-visible{outline:3px solid var(--goud);outline-offset:2px}
+.optie .letter{font-family:"Archivo Black";color:var(--teal);font-size:15px;flex:none}
+.optie.juist{border-color:var(--mint);background:var(--mintlicht)}
+.optie.gekozenfout{border-color:var(--rood);background:var(--roodlicht)}
+.optie.uit{opacity:.45;pointer-events:none}
+.optie:disabled{cursor:default}
+
+/* feedback */
+.feedback{display:none;margin-top:16px;border-top:2px dashed var(--lijn);padding-top:14px}
+.feedback.zichtbaar{display:block}
+.fb-kop{font-family:"Archivo Black";font-size:20px;display:flex;align-items:center;gap:10px}
+.fb-kop.goed{color:var(--mint)} .fb-kop.fout{color:var(--rood)}
+.fb-punt{font-family:"Archivo Black";font-size:15px;background:var(--mintlicht);color:var(--mint);border-radius:8px;padding:3px 9px}
+.fb-uitleg{margin-top:8px;font-size:16px;color:#4c4a41;line-height:1.5}
+.fb-uitleg b{color:var(--teal)}
+.mini-stempel{
+  position:absolute;right:14px;top:14px;transform:rotate(8deg);font-family:"Archivo Black";font-size:17px;padding:4px 12px;border-radius:8px;
+  border:3.5px solid;opacity:0;pointer-events:none;
+}
+.mini-stempel.goed{color:var(--mint);border-color:var(--mint)}
+.mini-stempel.fout{color:var(--rood);border-color:var(--rood)}
+.mini-stempel.zichtbaar{animation:stamp .32s cubic-bezier(.2,1.4,.4,1) forwards}
+@keyframes stamp{0%{opacity:0;transform:rotate(8deg) scale(2.4)}70%{opacity:1;transform:rotate(-6deg) scale(.95)}100%{opacity:.95;transform:rotate(-6deg) scale(1)}}
+
+.onderknoppen{margin-top:16px;display:flex;justify-content:flex-end}
+
+/* resultaat */
+.resultkaart{background:var(--papier);color:var(--inkt);border-radius:16px;padding:clamp(22px,4vw,34px);margin-top:18px;box-shadow:var(--schaduw);text-align:center;position:relative;overflow:hidden}
+.medaille{font-family:"Archivo Black";font-size:clamp(24px,5vw,34px);color:var(--teal)}
+.eindscore{font-family:"Archivo Black";font-size:clamp(52px,12vw,84px);line-height:1;margin:8px 0 2px}
+.van{font-size:14px;color:#7a7361;font-weight:700;letter-spacing:.15em}
+.boodschap{margin-top:12px;font-size:16.5px;color:#4c4a41;line-height:1.5}
+.themas{margin-top:20px;text-align:left}
+.thema{display:flex;align-items:center;gap:12px;margin-top:10px}
+.thema .naam{flex:0 0 40%;font-weight:700;font-size:14.5px}
+.staaf{flex:1;height:14px;background:var(--papier2);border-radius:7px;overflow:hidden}
+.staaf i{display:block;height:100%;background:var(--teal);border-radius:7px}
+.thema .cijfer{flex:0 0 46px;text-align:right;font-family:"Archivo Black";font-size:14px;color:var(--teal)}
+.herhaaltip{margin-top:16px;font-size:14.5px;color:#6e6852;background:var(--papier2);border-radius:10px;padding:12px 14px;text-align:left}
+.eindknoppen{margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.stuurbox{
+  margin-top:16px;background:var(--goud);color:var(--inkt);border-radius:12px;padding:14px 18px;
+  display:flex;align-items:center;gap:12px;justify-content:center;text-align:left;
+  font-size:16.5px;font-weight:700;box-shadow:var(--schaduw);
+}
+.stuurbox .icoon{font-size:26px;flex:none}
+footer{padding:10px 0 14px;text-align:center;font-size:12px;color:#5a6d90}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- START -->
+  <section class="screen actief" id="start">
+    <div class="eyebrow">Publieke diensten &bull; Oefenquiz voor jou alleen</div>
+    <h1>Mijn Loketpas</h1>
+    <p class="sub">15 vragen over de gemeente, het OCMW, het CAW, de noodnummers en de twee sporen. Elk juist antwoord = <b style="color:var(--goud)">10 punten</b> en een stempel op je pas. Drie juist na elkaar? <b style="color:var(--goud)">+5 bonus!</b></p>
+    <div class="startkaart">
+      <label for="naam">Jouw naam (mag ook leeg blijven)</label>
+      <input id="naam" maxlength="24" placeholder="bv. Amina" autocomplete="off">
+      <p class="sub" style="font-size:14.5px;margin-top:14px">Per vraag heb je <b style="color:var(--goud)">40 seconden</b>. Antwoord je niet op tijd? Dan telt de vraag als fout. Na elk antwoord krijg je meteen de uitleg.</p>
+      <div style="margin-top:18px"><button class="btn btn-primair" id="startKnop">Start de quiz &rarr;</button></div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="screen" id="quiz">
+    <div class="balk">
+      <div>
+        <div class="eyebrow" id="qNaam">Loketpas</div>
+        <div class="reeks" id="reeks"></div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <div class="timervak" id="timervak"><small>TIJD</small><b id="tijd">40</b></div>
+        <div class="puntenvak"><small>PUNTEN</small><b id="punten">0</b></div>
+      </div>
+    </div>
+    <div class="tijdbalk" aria-hidden="true"><i id="tijdbalkVul"></i></div>
+    <div class="stempelkaart" id="paskaart" aria-label="Voortgang"></div>
+    <div class="vraagkaart">
+      <span class="themalabel" id="qThema"></span>
+      <div class="vtekst" id="qTekst"></div>
+      <div class="opties" id="qOpties"></div>
+      <div class="mini-stempel" id="qStempel"></div>
+      <div class="feedback" id="qFeedback">
+        <div class="fb-kop" id="fbKop"></div>
+        <div class="fb-uitleg" id="fbUitleg"></div>
+      </div>
+    </div>
+    <div class="onderknoppen">
+      <button class="btn btn-primair" id="qVolgende" style="display:none">Volgende vraag &rarr;</button>
+    </div>
+  </section>
+
+  <!-- RESULTAAT -->
+  <section class="screen" id="einde">
+    <div class="eyebrow">Klaar!</div>
+    <h1 id="eNaamKop">Jouw Loketpas</h1>
+    <div class="resultkaart">
+      <div class="medaille" id="eMedaille"></div>
+      <div class="eindscore" id="eScore"></div>
+      <div class="van" id="eVan"></div>
+      <div class="boodschap" id="eBoodschap"></div>
+      <div class="themas" id="eThemas"></div>
+      <div class="herhaaltip" id="eTip"></div>
+      <div class="eindknoppen">
+        <button class="btn btn-primair" id="eOpnieuw">Nog eens spelen</button>
+      </div>
+    </div>
+    <div class="stuurbox"><span class="icoon">📸</span><span>Klaar? Maak een screenshot van dit scherm en stuur de foto naar Angela.</span></div>
+  </section>
+
+  <footer>Mijn Loketpas &bull; Maatschappelijke Ori&euml;ntatie &mdash; publieke diensten</footer>
+</div>
+
+<script>
+/* ---------- vragen ---------- */
+/* thema's: gemeente | hulp | nood | digitaal | sporen */
+const VRAGEN=[
+ {t:"gemeente", v:"Je e-ID is verlopen. Waar vraag je een nieuwe aan?",
+  o:["Bij de politie","Bij de gemeente (dienst burgerzaken)","Bij het CAW","Bij het ziekenfonds"], j:1,
+  u:"De dienst burgerzaken regelt je e-ID, je adres en veel documenten."},
+ {t:"gemeente", v:"Je verhuist naar een andere gemeente. Binnen hoeveel werkdagen meld je dat?",
+  o:["3 werkdagen","8 werkdagen","15 werkdagen","30 werkdagen"], j:1,
+  u:"Meld je verhuis binnen 8 werkdagen bij je nieuwe gemeente."},
+ {t:"gemeente", v:"Wie komt na je verhuis controleren of je echt op je nieuwe adres woont?",
+  o:["De burgemeester","De brandweer","De wijkagent","De postbode"], j:2,
+  u:"Dat heet de woonstcontrole. Daarna is je adres offici\u00ebel."},
+ {t:"gemeente", v:"Er is een baby geboren. Binnen hoeveel dagen doe je de aangifte?",
+  o:["5 dagen","15 dagen","30 dagen","60 dagen"], j:1,
+  u:"De aangifte gebeurt bij de burgerlijke stand van de gemeente."},
+ {t:"hulp", v:"Yusuf (18) heeft geen inkomen en werkte nog nooit. Wat kan hij aanvragen bij het OCMW?",
+  o:["Een pensioen","Het leefloon","Een werkloosheidsuitkering","Het Groeipakket"], j:1,
+  u:"Het leefloon is het vangnet (spoor 2): het OCMW onderzoekt eerst je situatie."},
+ {t:"hulp", v:"Een gesprek bij het CAW is gratis en vertrouwelijk.",
+  o:["Waar","Niet waar"], j:0,
+  u:"Klopt! Ook zonder afspraak, ook voor jongeren. Wat je zegt, blijft geheim."},
+ {t:"hulp", v:"Je zoekt werk of een opleiding in Vlaanderen. Welke dienst helpt je?",
+  o:["VDAB","RIZIV","FEDRIS","De brandweer"], j:0,
+  u:"In Brussel heet die dienst ACTIRIS."},
+ {t:"nood", v:"Er is brand in de keuken. Welk nummer bel je?",
+  o:["101","112","1700"], j:1,
+  u:"112 = brandweer en ambulance. Zeg altijd: wie \u2013 wat \u2013 waar."},
+ {t:"nood", v:"Je ziet op dit moment een inbraak. Welk nummer bel je?",
+  o:["101","112","Geen enkel nummer"], j:0,
+  u:"101 = dringende politiehulp."},
+ {t:"nood", v:"Je fiets is gisteren gestolen. Het is niet dringend. Wat doe je?",
+  o:["Ik bel 112","Ik bel 101","Ik ga naar de lokale politie"], j:2,
+  u:"Niet dringend? De lokale politie. Zo blijven 112 en 101 vrij voor noodgevallen."},
+ {t:"digitaal", v:"Wat is itsme?",
+  o:["Een spelletjesapp","Een app om in te loggen bij de overheid en de bank","Een sociale netwerksite","Een e-mailprogramma"], j:1,
+  u:"itsme is een digitale sleutel, net zoals je e-ID met pincode."},
+ {t:"digitaal", v:"Een vriend vraagt je pincode. Wat doe je?",
+  o:["Ik geef ze, hij is mijn vriend","Ik geef ze nooit door","Ik stuur ze via sms"], j:1,
+  u:"Je pincode en itsme-code zijn alleen van jou. Ook de bank of de overheid vraagt er nooit naar."},
+ {t:"sporen", v:"Leila werkte 3 jaar en verliest haar werk. Welke instelling regelt haar uitkering?",
+  o:["Het OCMW","De RVA","Het CAW","De gemeente"], j:1,
+  u:"Spoor 1 (verzekering): ze betaalde bijdragen, dus ze bouwde rechten op bij de RVA."},
+ {t:"sporen", v:"Het ziekenfonds betaalt je medicijnen terug. Welk spoor is dat?",
+  o:["Spoor 1: verzekering","Spoor 2: vangnet"], j:0,
+  u:"Spoor 1: je bouwt die rechten op door te werken en bijdragen te betalen."},
+ {t:"sporen", v:"In welk jaar sloten werkgevers, werknemers en de staat het Sociaal Pact?",
+  o:["1830","1914","1944","1999"], j:2,
+  u:"Na de Tweede Wereldoorlog. Zo ontstond de RSZ \u2014 de start van de moderne sociale zekerheid."},
+];
+const THEMANAMEN={gemeente:"De gemeente",hulp:"OCMW & CAW",nood:"Noodnummers",digitaal:"Digitaal",sporen:"De twee sporen"};
+const HERHAALTIPS={
+ gemeente:"Bekijk nog eens: de dienst burgerzaken, 8 werkdagen (verhuis) en 15 dagen (geboorte).",
+ hulp:"Bekijk nog eens: het leefloon (OCMW, spoor 2) en het CAW (gratis en vertrouwelijk).",
+ nood:"Bekijk nog eens: 112 = brand en ambulance, 101 = dringende politie, niet dringend = lokale politie.",
+ digitaal:"Bekijk nog eens: e-ID, itsme en de gouden regel \u2014 deel nooit je codes.",
+ sporen:"Bekijk nog eens: spoor 1 = verzekering (werken + bijdragen), spoor 2 = vangnet (basis = nood)."};
+
+/* ---------- toestand ---------- */
+const PUNT=10, BONUS=5;
+let volgorde=[], idx=0, score=0, reeksTeller=0;
+const TIJD_PER_VRAAG=40;
+let vraagTimer=null, tijdOver=TIJD_PER_VRAAG;
+let resultaten=[]; // {t, goed}
+const $=id=>document.getElementById(id);
+
+function husselOpties(q){
+  const paren=q.o.map((tekst,i)=>({tekst,juist:i===q.j}));
+  /* Waar/Niet waar en Spoor-vragen niet husselen (vaste volgorde is duidelijker) */
+  if(q.o.length>2){for(let i=paren.length-1;i>0;i--){const k=Math.floor(Math.random()*(i+1));[paren[i],paren[k]]=[paren[k],paren[i]];}}
+  return paren;
+}
+
+/* ---------- start ---------- */
+$("startKnop").onclick=()=>{
+  volgorde=[...VRAGEN].sort(()=>Math.random()-.5);
+  idx=0;score=0;reeksTeller=0;resultaten=[];
+  const naam=$("naam").value.trim();
+  $("qNaam").textContent=naam?`Loketpas van ${naam}`:"Mijn Loketpas";
+  $("punten").textContent="0";$("reeks").textContent="";
+  tekenPas(); toon("quiz"); toonVraag();
+};
+
+function toon(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("actief"));$(id).classList.add("actief");}
+
+/* ---------- paskaart ---------- */
+function tekenPas(){
+  const c=$("paskaart");c.innerHTML="";
+  volgorde.forEach((_,i)=>{
+    const d=document.createElement("div");d.className="vakje";
+    if(i<resultaten.length) d.classList.add(resultaten[i].goed?"goed":"fout"), d.textContent=resultaten[i].goed?"\u2713":"\u2715";
+    else if(i===idx) d.classList.add("nu"), d.textContent=i+1;
+    else d.textContent=i+1;
+    c.appendChild(d);
+  });
+}
+
+/* ---------- vraag ---------- */
+let huidigeParen=[];
+function toonVraag(){
+  const q=volgorde[idx];
+  huidigeParen=husselOpties(q);
+  $("qThema").textContent=THEMANAMEN[q.t];
+  $("qTekst").textContent=q.v;
+  const c=$("qOpties");c.innerHTML="";
+  huidigeParen.forEach((p,i)=>{
+    const b=document.createElement("button");b.className="optie";
+    b.innerHTML=`<span class="letter">${"ABCD"[i]}</span><span>${p.tekst}</span>`;
+    b.onclick=()=>kies(b,p.juist,q);
+    c.appendChild(b);
+  });
+  $("qFeedback").className="feedback";
+  $("qStempel").className="mini-stempel";$("qStempel").textContent="";
+  $("qVolgende").style.display="none";
+  tekenPas();
+  startVraagTimer(q);
+}
+
+/* ---------- cronometru per vraag ---------- */
+function startVraagTimer(q){
+  stopVraagTimer();
+  tijdOver=TIJD_PER_VRAAG;
+  updateTimerUI();
+  vraagTimer=setInterval(()=>{
+    tijdOver--;
+    updateTimerUI();
+    if(tijdOver<=0){stopVraagTimer();tijdOp(q);}
+  },1000);
+}
+function stopVraagTimer(){if(vraagTimer){clearInterval(vraagTimer);vraagTimer=null;}}
+function updateTimerUI(){
+  $("tijd").textContent=Math.max(tijdOver,0);
+  const vak=$("timervak"), vul=$("tijdbalkVul");
+  vul.style.width=(100*Math.max(tijdOver,0)/TIJD_PER_VRAAG)+"%";
+  const bijna=tijdOver<=10;
+  vak.classList.toggle("bijna",bijna);
+  vul.classList.toggle("bijna",bijna);
+}
+function tijdOp(q){
+  /* geen antwoord binnen 40 sec. = fout */
+  document.querySelectorAll("#qOpties .optie").forEach(b=>{b.disabled=true;b.classList.add("uit");});
+  document.querySelectorAll("#qOpties .optie").forEach((b,i)=>{
+    if(huidigeParen[i].juist){b.classList.remove("uit");b.classList.add("juist");}
+  });
+  reeksTeller=0;$("reeks").textContent="";
+  $("qStempel").textContent="TE LAAT";$("qStempel").classList.add("fout","zichtbaar");
+  $("fbKop").className="fb-kop fout";
+  $("fbKop").textContent="De tijd is om \u2014 dit telt als fout. Lees de uitleg:";
+  resultaten.push({t:q.t,goed:false});
+  $("fbUitleg").innerHTML=`<b>Uitleg:</b> ${q.u}`;
+  $("qFeedback").classList.add("zichtbaar");
+  $("qVolgende").style.display="inline-block";
+  $("qVolgende").textContent = idx<volgorde.length-1 ? "Volgende vraag \u2192" : "Bekijk mijn resultaat \u2192";
+  tekenPas();
+  $("qVolgende").focus();
+}
+
+function kies(knop,juist,q){
+  stopVraagTimer();
+  document.querySelectorAll("#qOpties .optie").forEach(b=>{b.disabled=true;b.classList.add("uit");});
+  document.querySelectorAll("#qOpties .optie").forEach((b,i)=>{
+    if(huidigeParen[i].juist){b.classList.remove("uit");b.classList.add("juist");}
+  });
+  let plus=0, bonus=0;
+  if(juist){
+    reeksTeller++; plus=PUNT;
+    if(reeksTeller%3===0){bonus=BONUS;}
+    score+=plus+bonus;
+    $("punten").textContent=score;
+    const pv=$("punten");pv.classList.add("plop");setTimeout(()=>pv.classList.remove("plop"),250);
+    $("reeks").textContent = reeksTeller>=2 ? `Reeks: ${reeksTeller} juist na elkaar${bonus?` \u2014 +${BONUS} bonus!`:""}` : "";
+    $("qStempel").textContent="GOED";$("qStempel").classList.add("goed","zichtbaar");
+    $("fbKop").className="fb-kop goed";
+    $("fbKop").innerHTML=`Juist! <span class="fb-punt">+${plus}${bonus?` +${bonus} bonus`:""}</span>`;
+  } else {
+    knop.classList.remove("uit");knop.classList.add("gekozenfout");
+    reeksTeller=0;$("reeks").textContent="";
+    $("qStempel").textContent="OEI";$("qStempel").classList.add("fout","zichtbaar");
+    $("fbKop").className="fb-kop fout";
+    $("fbKop").textContent="Niet juist \u2014 lees de uitleg:";
+  }
+  resultaten.push({t:q.t,goed:juist});
+  $("fbUitleg").innerHTML=`<b>Uitleg:</b> ${q.u}`;
+  $("qFeedback").classList.add("zichtbaar");
+  $("qVolgende").style.display="inline-block";
+  $("qVolgende").textContent = idx<volgorde.length-1 ? "Volgende vraag \u2192" : "Bekijk mijn resultaat \u2192";
+  tekenPas();
+  $("qVolgende").focus();
+}
+
+$("qVolgende").onclick=()=>{
+  if(idx<volgorde.length-1){idx++;toonVraag();}
+  else toonEinde();
+};
+
+/* ---------- einde ---------- */
+function toonEinde(){
+  stopVraagTimer();
+  const nGoed=resultaten.filter(r=>r.goed).length, n=resultaten.length;
+  const maxScore=n*PUNT+Math.floor(n/3)*BONUS;
+  const naam=$("naam").value.trim();
+  $("eNaamKop").textContent=naam?`Loketpas van ${naam}`:"Jouw Loketpas";
+  $("eScore").textContent=score;
+  $("eVan").textContent=`PUNTEN \u2022 ${nGoed} VAN DE ${n} VRAGEN JUIST`;
+  const pct=nGoed/n;
+  let med,msg;
+  if(pct>=0.93){med="\u2605\u2605\u2605 Loket-expert";msg="Schitterend! Jij vindt overal je weg: van het gemeentehuis tot het CAW. Jij kan anderen nu helpen.";}
+  else if(pct>=0.75){med="\u2605\u2605 Sterke burger";msg="Heel goed! Je kent de belangrijkste diensten. Bekijk de uitleg van je foutjes nog eens \u2014 dan ben je expert.";}
+  else if(pct>=0.5){med="\u2605 Goed op weg";msg="Mooi zo, je bent goed op weg! Speel nog eens: de vragen komen in een andere volgorde.";}
+  else {med="Dapper geprobeerd";msg="Elke vraag heeft uitleg \u2014 lees die rustig en probeer opnieuw. Vragen stellen aan je leerkracht mag altijd!";}
+  $("eMedaille").textContent=med;
+  $("eBoodschap").textContent=msg;
+
+  /* thema-overzicht */
+  const per={};
+  resultaten.forEach(r=>{per[r.t]=per[r.t]||{g:0,tot:0};per[r.t].tot++;if(r.goed)per[r.t].g++;});
+  const c=$("eThemas");c.innerHTML="";
+  let zwakste=null;
+  Object.keys(THEMANAMEN).forEach(t=>{
+    if(!per[t])return;
+    const {g,tot}=per[t], p=Math.round(100*g/tot);
+    if(!zwakste||g/tot<zwakste.p){zwakste={t,p:g/tot};}
+    const d=document.createElement("div");d.className="thema";
+    d.innerHTML=`<span class="naam">${THEMANAMEN[t]}</span><span class="staaf"><i style="width:${p}%"></i></span><span class="cijfer">${g}/${tot}</span>`;
+    c.appendChild(d);
+  });
+  $("eTip").innerHTML = zwakste && zwakste.p<1
+    ? `<b>Tip voor jou:</b> ${HERHAALTIPS[zwakste.t]}`
+    : `<b>Tip voor jou:</b> alles juist \u2014 niets te herhalen. Proficiat!`;
+  toon("einde");
+}
+$("eOpnieuw").onclick=()=>{stopVraagTimer();toon("start");};
+</script>
+</body>
+</html>
